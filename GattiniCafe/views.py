@@ -2,12 +2,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.views.generic import ListView
-from rest_framework.generics import ListAPIView, CreateAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from .serializers import (ProdottoSerializer, CategoriaSerializer, RegisterSerializer)
+from rest_framework.generics import ListAPIView, CreateAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView, \
+    RetrieveAPIView
+from .serializers import (ProdottoSerializer, CategoriaSerializer, RegisterSerializer, OrdineSerializer, OrdineProdottoSerializer)
 from django.db.models import Q
 from django.contrib.auth.models import User
-from .models import Prodotto
-from .models import Categoria
+from .models import Prodotto, Ordine, Categoria
 
 # IN QUESTO CODICE CI SONO ANCHE DEGLI APPUNTI
 # SU NUOVI ELEMENTI NON VISTI IN CLASSE
@@ -99,3 +99,41 @@ class CategoriaDetail(RetrieveUpdateDestroyAPIView):
     serializer_class = CategoriaSerializer
     permission_classes = [IsAuthenticated, IsAdminUser]
     lookup_field = 'id'
+
+# GET + POST - LISTA DEGLI ORDINI
+class OrdineListCreate(ListCreateAPIView):
+    serializer_class = OrdineSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff:
+            return Ordine.objects.all()
+        return Ordine.objects.filter(utente=user)
+
+    def perform_create(self, serializer):
+        serializer.save(utente=self.request.user)
+
+# DETTAGLIO DELL'ORDINE
+class OrdineDetail(RetrieveAPIView):
+    serializer_class = OrdineSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'id'
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff:
+            return Ordine.objects.all()
+        return Ordine.objects.filter(utente=user)
+
+# MODIFICA STATO (SOLO ADMIN)
+class OrdineStatoUpdate(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def patch(self, request, id):
+        ordine = Ordine.objects.get(id=id)
+
+        ordine.stato = request.data.get("stato")
+        ordine.save()
+
+        return Response({"message": "stato aggiornato"})

@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import ProdottoList, ProdottoDetail, CategoriaList, CategoriaDetail, RegisterView, MeView
+from .views import ProdottoList, ProdottoDetail, CategoriaList, CategoriaDetail, RegisterView, MeView, OrdineDetail, OrdineListCreate, OrdineStatoUpdate
 
 urlpatterns = [
 
@@ -14,4 +14,9 @@ urlpatterns = [
     # AUTH (interno app ma sotto /api/auth/)
     path('auth/register/', RegisterView.as_view()),
     path('auth/me/', MeView.as_view()),
+
+    # ORDINI
+    path('ordini/', OrdineListCreate.as_view()),
+    path('ordini/<int:id>/', OrdineDetail.as_view()),
+    path('ordini/<int:id>/stato/', OrdineStatoUpdate.as_view()),
 ]
