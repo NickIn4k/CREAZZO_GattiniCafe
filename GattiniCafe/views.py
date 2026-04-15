@@ -1,9 +1,14 @@
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from django.views.generic import ListView
-from rest_framework.generics import ListAPIView, RetrieveAPIView
-from .serializers import ProdottoSerializer, CategoriaSerializer
+from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView
+from .serializers import (ProdottoSerializer, CategoriaSerializer, RegisterSerializer)
 from django.db.models import Q
+from django.contrib.auth.models import User
 from .models import Prodotto
 from .models import Categoria
+from .serializers import RegisterSerializer
 
 # IN QUESTO CODICE CI SONO ANCHE DEGLI APPUNTI
 # SU NUOVI ELEMENTI NON VISTI IN CLASSE
@@ -63,3 +68,19 @@ class CategoriaDetail(RetrieveAPIView):
     serializer_class = CategoriaSerializer
     lookup_field = 'id'
 
+# REGISTRAZIONE
+class RegisterView(CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = RegisterSerializer
+    permission_classes = []  # vuoto => nessun permesso richiesto
+
+class MeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        return Response({
+            'id': user.id,
+            'username': user.username,
+            'email': user.email
+        })
