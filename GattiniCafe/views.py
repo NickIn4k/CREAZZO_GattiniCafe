@@ -1,14 +1,13 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.views.generic import ListView
-from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from .serializers import (ProdottoSerializer, CategoriaSerializer, RegisterSerializer)
 from django.db.models import Q
 from django.contrib.auth.models import User
 from .models import Prodotto
 from .models import Categoria
-from .serializers import RegisterSerializer
 
 # IN QUESTO CODICE CI SONO ANCHE DEGLI APPUNTI
 # SU NUOVI ELEMENTI NON VISTI IN CLASSE
@@ -24,7 +23,7 @@ class AllCategories(ListView):
 
 # VIEW RICHIESTE DALLA CONSEGNA
 
-# LISTA PRODOTTI CON PARAMETRI AGGIUNTIVI - NON VISTO IN CLASSE
+# LISTA PRODOTTI CON PARAMETRI AGGIUNTIVI - API PUBBLICA
 class ProdottoList(ListAPIView):
     serializer_class = ProdottoSerializer
 
@@ -46,34 +45,23 @@ class ProdottoList(ListAPIView):
         if search:
             # Q: QUERY COMPLESSE (BOOLEAN OP)
             queryset = queryset.filter(
-                Q(nome__icontains=search) |Q(descrizione__icontains=search)
+                Q(nome__icontains=search) | Q(descrizione__icontains=search)
             )
 
         return queryset
 
-# PRODOTTO SINGOLO <int:id>
-class ProdottoDetail(RetrieveAPIView):
-    queryset = Prodotto.objects.all()
-    serializer_class = ProdottoSerializer
-    lookup_field = 'id'
-
-# LISTA CATEGORIE (NO FILTRI RICHIESTI)
+# LISTA CATEGORIE (NO FILTRI RICHIESTI) - API PUBBLICA
 class CategoriaList(ListAPIView):
     queryset = Categoria.objects.all()
     serializer_class = CategoriaSerializer
 
-# CATEGORIA SINGOLA <int:id>
-class CategoriaDetail(RetrieveAPIView):
-    queryset = Categoria.objects.all()
-    serializer_class = CategoriaSerializer
-    lookup_field = 'id'
-
-# REGISTRAZIONE
+# REGISTRAZIONE NEL DB
 class RegisterView(CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
     permission_classes = []  # vuoto => nessun permesso richiesto
 
+# DETTAGLI ADMIN - JWT
 class MeView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -84,3 +72,30 @@ class MeView(APIView):
             'username': user.username,
             'email': user.email
         })
+
+#is_staff fa parte di User in Django
+# POST + GET - CREA PRODOTTO E VISUALIZZA
+class ProdottoListCreate(ListCreateAPIView):
+    queryset = Prodotto.objects.all()
+    serializer_class = ProdottoSerializer
+    permission_classes = [IsAuthenticated, IsAdminUser] #IsAdminUser ha anche IsAuthenticated internamente => lascio così per revisioni
+
+# PUT + PATCH + DELETE - MODIFICA / AGGIORNA / ELIMINA PRODOTTO
+class ProdottoDetail(RetrieveUpdateDestroyAPIView):
+    queryset = Prodotto.objects.all()
+    serializer_class = ProdottoSerializer
+    permission_classes =[IsAuthenticated, IsAdminUser]
+    lookup_field = 'id'
+
+# POST + GET - CREA CATEGORIA
+class CategoriaListCreate(ListCreateAPIView):
+    queryset = Categoria.objects.all()
+    serializer_class = CategoriaSerializer
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+# PUT + DELETE - MODIFICA / ELIMINA CATEGORIA
+class CategoriaDetail(RetrieveUpdateDestroyAPIView):
+    queryset = Categoria.objects.all()
+    serializer_class = CategoriaSerializer
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    lookup_field = 'id'
