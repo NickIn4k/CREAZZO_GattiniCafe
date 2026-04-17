@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="it">
+    <head>
+        <meta charset="UTF-8">
+        <title>Gattini Cafe Client</title>
+        <link rel="stylesheet" href="style.css"></link>
+    </head>
+    <body>
+        <h1>Gattini Cafe</h1>
+
+        <!-- LOGIN -->
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="login()">Login</button>
+
+        <hr>
+
+        <!-- MENU -->
+        <h2>Prodotti</h2>
+        <button onclick="loadProdotti()">Carica prodotti</button>
+        <ul id="prodotti-list"></ul>
+
+        <hr>
+
+        <!-- ORDINE -->
+        <h2>Crea Ordine</h2>
+        <input type="number" id="prodotto_id" placeholder="ID prodotto">
+        <input type="number" id="quantita" placeholder="Quantità">
+        <button onclick="creaOrdine()">Ordina</button>
+
+        <p id="result"></p>
+        <script src="app.js"></script>
+    </body>
+</html>
