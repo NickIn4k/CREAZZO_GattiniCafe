@@ -1,7 +1,10 @@
 from django.urls import path
-from .views import ProdottoList, ProdottoDetail, CategoriaList, CategoriaDetail, RegisterView, MeView, OrdineDetail, OrdineListCreate, OrdineStatoUpdate
+from .views import ProdottoList, ProdottoDetail, CategoriaList, CategoriaDetail, RegisterView, MeView, OrdineDetail, OrdineListCreate, OrdineStatoUpdate, AllProducts, AllCategories
 
 urlpatterns = [
+    # PAGINE HTML
+    path('prodotti-html/', AllProducts.as_view()),
+    path('categorie-html/', AllCategories.as_view()),
 
     # PRODOTTI
     path('prodotti/', ProdottoList.as_view()),
